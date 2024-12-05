@@ -161,13 +161,12 @@ app.post('/uploadExamenImage', (req, res) => {
   uploadStream.end(file.data);
 
   uploadStream.on('finish', async () => {
-    const fileId = uploadStream.id; // Obtiene el ID del archivo subido
+    const fileId = uploadStream.id; 
 
-    // Ahora, puedes almacenar el ID en la colección 'examenes'
     const examen = {
-      id_materia: req.body.id_materia,  // Asume que tienes la id_materia en el body
-      examen: fileId,                   // Almacenar el ID del archivo en lugar de la URL
-      fecha: req.body.fecha             // Asume que tienes la fecha en el body
+      id_materia: req.body.id_materia,  
+      examen: fileId,                   
+      fecha: req.body.fecha            
     };
 
     try {
