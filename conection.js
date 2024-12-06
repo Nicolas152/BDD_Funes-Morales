@@ -41,8 +41,6 @@ sqliteDb.run(`CREATE TABLE IF NOT EXISTS usuarios (
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
-
 // Ruta para servir el archivo HTML
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -154,6 +152,7 @@ app.post('/uploadExamenImage', (req, res) => {
     return res.status(400).json({ message: 'No se ha subido ningún archivo.' });
   }
 
+  const { id_materia, fecha } = req.body;
   const file = req.files.image;
   const uploadStream = bucket.openUploadStream(file.name);
 
@@ -161,12 +160,13 @@ app.post('/uploadExamenImage', (req, res) => {
   uploadStream.end(file.data);
 
   uploadStream.on('finish', async () => {
-    const fileId = uploadStream.id; 
+    const fileId = uploadStream.id;  // Guardamos el ID del archivo en GridFS
+    console.log('Archivo subido con éxito:', fileId);
 
     const examen = {
-      id_materia: req.body.id_materia,  
-      examen: fileId,                   
-      fecha: req.body.fecha            
+      id_materia,
+      examen: fileId,  // Guardamos el `fileId` en lugar del nombre del archivo
+      fecha
     };
 
     try {
@@ -186,18 +186,99 @@ app.post('/uploadExamenImage', (req, res) => {
 });
 
 
-// Servir la imagen desde MongoDB GridFS
-app.get('/examenImage/:filename', (req, res) => {
-  const filename = req.params.filename;
+// app.get('/examenImage/:filename', (req, res) => {
+//   const filename = req.params.filename;
 
-  const downloadStream = bucket.openDownloadStreamByName(filename);
+//   bucket.find({ filename }).toArray((err, files) => {
+//     if (err || !files || files.length === 0) {
+//       return res.status(404).json({ message: 'Archivo no encontrado' });
+//     }
 
-  downloadStream.pipe(res);
-  downloadStream.on('error', (err) => {
-    console.error(err);
-    res.status(404).json({ message: 'Imagen no encontrada' });
-  });
+//     const downloadStream = bucket.openDownloadStreamByName(filename);
+//     downloadStream.pipe(res);
+//   });
+// });
+
+app.get('/examenImage/:id', (req, res) => {
+  const fileId = req.params.id;
+  console.log("Recibido fileId en la solicitud:", fileId);
+
+  try {
+      const { ObjectId } = require('mongodb');
+      const objectId = new ObjectId(fileId);
+      console.log("ObjectId generado:", objectId);
+
+      bucket.find({ _id: objectId }).toArray((err, files) => {
+          if (err || !files || files.length === 0) {
+              console.error("Archivo no encontrado en GridFS para el ID:", fileId);
+              return res.status(404).json({ message: 'Archivo no encontrado' });
+          }
+
+          console.log("Archivo encontrado en GridFS:", files[0].filename);
+
+          // Configurar headers para la descarga
+          res.set({
+              'Content-Type': 'application/octet-stream',
+              'Content-Disposition': `attachment; filename="${files[0].filename}"`,
+          });
+
+          const downloadStream = bucket.openDownloadStream(objectId);
+
+          downloadStream.on('data', (chunk) => {
+              console.log("Transfiriendo chunk de datos:", chunk.length);
+          });
+
+          downloadStream.on('end', () => {
+              console.log("Descarga completada.");
+              res.end(); // Finaliza la respuesta después de la descarga
+          });
+
+          downloadStream.on('error', (err) => {
+              console.error("Error en el stream de descarga:", err);
+              res.status(500).json({ message: 'Error al descargar el archivo', error: err });
+          });
+
+          downloadStream.pipe(res); // Inicia la transmisión al cliente
+      });
+  } catch (err) {
+      console.error("Error al procesar el ID:", err);
+      res.status(400).json({ message: 'ID inválido o archivo no encontrado', error: err });
+  }
 });
+
+
+// app.get('/examenImage/:id', (req, res) => {
+//   const fileId = req.params.id; // ID recibido en la URL
+//   console.log("Recibido fileId en la solicitud:", fileId); // Log para confirmar que llega la solicitud
+
+//   try {
+//       const { ObjectId } = require('mongodb');
+//       const objectId = new ObjectId(fileId); // Convierte a ObjectId
+//       console.log("ObjectId generado:", objectId); // Log del ID convertido
+
+//       bucket.find({ _id: objectId }).toArray((err, files) => {
+//           if (err || !files || files.length === 0) {
+//               console.error("Archivo no encontrado en GridFS para el ID:", fileId);
+//               return res.status(404).json({ message: 'Archivo no encontrado' });
+//           }
+//           console.log("Archivo encontrado, iniciando descarga...");
+
+//           const downloadStream = bucket.openDownloadStream(objectId);
+//           downloadStream.pipe(res);
+
+//           downloadStream.on('error', (err) => {
+//               console.error("Error en el stream de descarga:", err);
+//               res.status(500).json({ message: 'Error al descargar el archivo', error: err });
+//           });
+//       });
+//   } catch (err) {
+//       console.error("Error al procesar el ID:", err);
+//       res.status(400).json({ message: 'ID inválido o archivo no encontrado', error: err });
+//   }
+// });
+
+
+
 
 // Eliminar un examen de MongoDB y GridFS
 app.delete('/deleteExamen/:id', async (req, res) => {
@@ -226,8 +307,7 @@ app.delete('/deleteExamen/:id', async (req, res) => {
   }
 });
 
-
-
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Iniciar el servidor
 app.listen(3000, () => {

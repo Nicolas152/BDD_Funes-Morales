@@ -14,10 +14,10 @@ document.getElementById('examenForm').addEventListener('submit', async (e) => {
     const formData = new FormData();
     formData.append('id_materia', idMateria);
     formData.append('fecha', fecha);
-    formData.append('examen', examenFile);
+    formData.append('image', examenFile);
   
     try {
-      const response = await fetch('/insertExamen', {
+      const response = await fetch('/uploadExamenImage', {
         method: 'POST',
         body: formData,
       });
@@ -51,6 +51,7 @@ document.getElementById('examenForm').addEventListener('submit', async (e) => {
             <td>${examen.id_materia}</td>
             <td>${examen.fecha}</td>
             <td>
+              <a href="/examenImage/${examen.examen}" target="_blank">Ver Archivo</a>
               <button onclick="deleteExamen('${examen._id}')">Eliminar</button>
             </td>
           `;
