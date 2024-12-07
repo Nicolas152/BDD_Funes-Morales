@@ -39,9 +39,37 @@
         <tbody id="userTableBody"></tbody>
       </table>
     </div>
+
+    <!-- Nueva sección para gestión de exámenes -->
+    <div class="examen-section">
+      <h2>Gestión de Exámenes</h2>
+      <form id="examenForm">
+        <label for="id_materia">ID Materia:</label>
+        <input type="text" id="id_materia" name="id_materia" required>
+        <label for="examenFile">Archivo Examen (PDF o Imagen):</label>
+        <input type="file" id="examenFile" name="examenFile" required>
+        <label for="fecha">Fecha del Examen:</label>
+        <input type="date" id="fecha" name="fecha" required>
+        <button type="submit">Agregar Examen</button>
+      </form>
+
+      <h3>Lista de Exámenes</h3>
+      <table id="examenTable">
+        <thead>
+          <tr>
+            <th>ID Materia</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="examenTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Vincula el archivo JS -->
+  <!-- Vincula el archivo JS para SQLite -->
   <script src="/js/sqlite_script.js"></script>
+  <!-- Vincula el nuevo archivo JS para MongoDB -->
+  <script src="/js/mongodb_script.js"></script>
 </body>
 </html>
