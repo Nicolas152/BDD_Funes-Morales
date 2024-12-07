@@ -1,40 +1,40 @@
 // Función para agregar un examen (Subir archivo y agregar a MongoDB)
 document.getElementById('examenForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-  
-    const idMateria = document.getElementById('id_materia').value;
-    const examenFile = document.getElementById('examenFile').files[0];
-    const fecha = document.getElementById('fecha').value;
-  
-    if (!examenFile) {
-      Swal.fire('Error', 'Por favor, selecciona un archivo de examen', 'error');
-      return;
+  e.preventDefault();
+
+  const idMateria = document.getElementById('id_materia').value;
+  const examenFile = document.getElementById('examenFile').files[0];
+  const fecha = document.getElementById('fecha').value;
+
+  if (!examenFile) {
+    Swal.fire('Error', 'Por favor, selecciona un archivo de examen', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('id_materia', idMateria);
+  formData.append('fecha', fecha);
+  formData.append('image', examenFile);
+
+  try {
+    const response = await fetch('/uploadExamenImage', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      Swal.fire('Éxito', 'Examen agregado correctamente', 'success');
+      loadExamenes(); // Recargar la lista de exámenes
+    } else {
+      Swal.fire('Error', data.message, 'error');
     }
-  
-    const formData = new FormData();
-    formData.append('id_materia', idMateria);
-    formData.append('fecha', fecha);
-    formData.append('image', examenFile);
-  
-    try {
-      const response = await fetch('/uploadExamenImage', {
-        method: 'POST',
-        body: formData,
-      });
-  
-      const data = await response.json();
-      if (response.ok) {
-        Swal.fire('Éxito', 'Examen agregado correctamente', 'success');
-        loadExamenes(); // Recargar la lista de exámenes
-      } else {
-        Swal.fire('Error', data.message, 'error');
-      }
-    } catch (error) {
-      console.error('Error al agregar examen:', error);
-      Swal.fire('Error', 'Ocurrió un error al agregar el examen', 'error');
-    }
-  });
-  
+  } catch (error) {
+    console.error('Error al agregar examen:', error);
+    Swal.fire('Error', 'Ocurrió un error al agregar el examen', 'error');
+  }
+});
+
 // Función para obtener todos los exámenes y cargarlos en la tabla
 async function loadExamenes() {
   try {
@@ -51,11 +51,12 @@ async function loadExamenes() {
           <td>${examen.id_materia}</td>
           <td>${examen.fecha}</td>
           <td>
-            <a href="/examenImage/${examen.examen}" target="_blank">Descargar Archivo</a>
+            <a href="/examenImage/${examen.examen}" target="_blank" class="download-btn">Descargar Archivo</a>
             <button onclick="updateExamen('${examen._id}')">Actualizar</button>
             <button onclick="deleteExamen('${examen._id}')">Eliminar</button>
           </td>
         `;
+
         examenTableBody.appendChild(row);
       });
     } else {
@@ -66,7 +67,6 @@ async function loadExamenes() {
     Swal.fire('Error', 'Ocurrió un error al cargar los exámenes', 'error');
   }
 }
-
 
 // Función para actualizar un examen
 async function updateExamen(examenId) {
@@ -125,38 +125,36 @@ async function updateExamen(examenId) {
   }
 }
 
-  
-  // Función para eliminar un examen
-  async function deleteExamen(id) {
-    const confirmDelete = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: '¡Este examen será eliminado permanentemente!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-    });
-  
-    if (confirmDelete.isConfirmed) {
-      try {
-        const response = await fetch(`/deleteExamen/${id}`, {
-          method: 'DELETE',
-        });
-  
-        const data = await response.json();
-        if (response.ok) {
-          Swal.fire('Éxito', 'Examen eliminado correctamente', 'success');
-          loadExamenes(); // Recargar la lista de exámenes
-        } else {
-          Swal.fire('Error', data.message, 'error');
-        }
-      } catch (error) {
-        console.error('Error al eliminar examen:', error);
-        Swal.fire('Error', 'Ocurrió un error al eliminar el examen', 'error');
+// Función para eliminar un examen
+async function deleteExamen(id) {
+  const confirmDelete = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: '¡Este examen será eliminado permanentemente!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+  });
+
+  if (confirmDelete.isConfirmed) {
+    try {
+      const response = await fetch(`/deleteExamen/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        Swal.fire('Éxito', 'Examen eliminado correctamente', 'success');
+        loadExamenes(); // Recargar la lista de exámenes
+      } else {
+        Swal.fire('Error', data.message, 'error');
       }
+    } catch (error) {
+      console.error('Error al eliminar examen:', error);
+      Swal.fire('Error', 'Ocurrió un error al eliminar el examen', 'error');
     }
   }
-  
-  // Cargar los exámenes al cargar la página
-  loadExamenes();
-  
+}
+
+// Cargar los exámenes al cargar la página
+loadExamenes();

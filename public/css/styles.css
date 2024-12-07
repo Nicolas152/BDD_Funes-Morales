@@ -67,4 +67,29 @@ body {
     display: flex;
     gap: 10px;
   }
+  .download-btn {
+    display: inline-block;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #28a745; /* Color verde igual que los botones */
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    text-align: center;
+  }
+  
+  .download-btn:hover {
+    background-color: #218838; /* Color verde más oscuro al pasar el ratón */
+  }
+  
+  .download-btn:focus {
+    outline: none;
+  }
+  #examenTable {
+    width: 90%; /* Ajusta este valor para que ocupe más o menos ancho */
+    margin: 20px auto; /* Centra la tabla y agrega espacio arriba y abajo */
+  }
   

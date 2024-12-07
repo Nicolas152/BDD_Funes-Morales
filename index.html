@@ -16,7 +16,7 @@
       <input type="email" id="mail" name="mail" required>
       <label for="padron">Padrón:</label>
       <input type="text" id="padron" name="padron" required>
-      <button type="submit">Agregar Usuario</button>
+      <button type="submit">Agregar Alumno</button>
     </form>
 
     <div class="search">
@@ -26,7 +26,7 @@
     </div>
 
     <div class="user-list">
-      <h2>Lista de Usuarios</h2>
+      <h2>Lista de Alumnos</h2>
       <table id="userTable">
         <thead>
           <tr>
@@ -50,22 +50,25 @@
         <input type="file" id="examenFile" name="examenFile" required>
         <label for="fecha">Fecha del Examen:</label>
         <input type="date" id="fecha" name="fecha" required>
-        <button type="submit">Agregar Examen</button>
+        <button type="submit" class="btn">Agregar Examen</button>
       </form>
-
+    
       <h3>Lista de Exámenes</h3>
-      <table id="examenTable">
-        <thead>
-          <tr>
-            <th>ID Materia</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="examenTableBody"></tbody>
-      </table>
+<table id="examenTable" class="user-list">
+  <thead>
+    <tr>
+      <th>ID Materia</th>
+      <th>Fecha</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody id="examenTableBody">
+    <!-- Aquí se llenarán los datos dinámicamente -->
+  </tbody>
+</table>
+
     </div>
-  </div>
+    
 
   <!-- Vincula el archivo JS para SQLite -->
   <script src="/js/sqlite_script.js"></script>
